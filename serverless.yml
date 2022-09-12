@@ -1,0 +1,26 @@
+org: tigaron
+app: train-schedule
+service: TrainChecker
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+
+functions:
+  City:
+    handler: handler.city
+    events:
+      - httpApi:
+          path: /city
+          method: get
+  Station:
+    handler: handler.station
+    events:
+      - httpApi:
+          path: /station
+          method: get
+
+plugins:
+  - serverless-offline
