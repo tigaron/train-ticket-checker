@@ -2,6 +2,8 @@ const got = require('got');
 const cheerio = require('cheerio');
 
 const baseUrl = 'https://booking.kai.id/';
+const monthRegex = /jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/;
+const classRegex = /Ekonomi|Bisnis|Eksekutif/;
 
 function apiResponse (statusCode, body) {
   return {
@@ -10,12 +12,46 @@ function apiResponse (statusCode, body) {
   };
 }
 
-exports.station = async function (event) {
-  const { from: origination, to: destination, date: tanggal, adult, infant, class: requestedClass } = event.queryStringParameters || {};
+const translatedMonth = {
+  'jan': 'Januari',
+  'feb': 'Februari',
+  'mar': 'Maret',
+  'apr': 'April',
+  'may': 'Mei',
+  'jun': 'Juni',
+  'jul': 'Juli',
+  'aug': 'Agustus',
+  'sep': 'September',
+  'oct': 'Oktober',
+  'nov': 'November',
+  'dec': 'Desember'
+};
 
-  if (!origination || !destination || !tanggal || !adult || !infant) {
-    return apiResponse(400, { message: 'missing required parameter(s)' });
+function translateMonth (date) {
+  return date.replace(monthRegex, function (matched) {
+    return translatedMonth[matched];
+  });
+}
+
+exports.station = async function (event) {
+  const {
+    from: origination,
+    to: destination,
+    date,
+    adult = 1,
+    infant = 0,
+    class: requestedClass
+  } = event.queryStringParameters || {};
+
+  if (!origination || !destination) {
+    return apiResponse(400, { message: 'missing from/to parameter' });
   }
+
+  if (!date || !monthRegex.test(date)) {
+    return apiResponse(400, { message: 'missing date parameter or invalid date format' });
+  }
+
+  const tanggal = translateMonth(date);
 
   const submit = 'Cari+%26+Pesan+Tiket';
 
@@ -79,10 +115,9 @@ exports.station = async function (event) {
   });
 
   if (!highlyAvailable.size || !limitedAvailability.size || !notAvailable.size) {
-    return apiResponse(404, { message: `No data found for route: ${origination} --> ${destination}` });
+    return apiResponse(404, { message: `No data found for route from ${origination} to ${destination} on ${date}` });
   }
 
-  const classRegex = /(Ekonomi|Bisnis|Eksekutif).*/;
   if (requestedClass && classRegex.test(requestedClass)) {
     return apiResponse(200, {
       highlyAvailable: Array.from(highlyAvailable).filter(item => item.trainClass.includes(requestedClass)),
