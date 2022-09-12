@@ -1,5 +1,4 @@
 org: tigaron
-app: train-schedule
 service: TrainChecker
 
 frameworkVersion: '3'
@@ -7,16 +6,16 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs16.x
+  region: ap-southeast-1
+  stage: ${opt:stage, 'dev'}
 
 functions:
-  City:
-    handler: handler.city
-    events:
-      - httpApi:
-          path: /city
-          method: get
   Station:
     handler: handler.station
+    name: ${self:service}-Station-${sls:stage}
+    description: Endpoint to check train schedule based on station
+    memorySize: 1024
+    timeout: 10
     events:
       - httpApi:
           path: /station

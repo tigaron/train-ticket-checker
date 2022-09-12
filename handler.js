@@ -10,20 +10,6 @@ function apiResponse (statusCode, body) {
   };
 }
 
-exports.city = async function (event) {
-  return {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: 'Go Serverless v3.0! Your function executed successfully!',
-        data: Array.from(data),
-      },
-      null,
-      2
-    ),
-  };
-};
-
 exports.station = async function (event) {
   const { from: origination, to: destination, date: tanggal, adult, infant, class: requestedClass } = event.queryStringParameters || {};
 
