@@ -10,6 +10,7 @@ const classRegex = /Ekonomi|Bisnis|Eksekutif/;
 function apiResponse (statusCode, body) {
   return {
     'statusCode': statusCode,
+    'headers': { 'Content-Type': 'application/json' },
     'body': JSON.stringify(body, null, 2),
   };
 }
@@ -112,11 +113,7 @@ exports.station = async function (event) {
       return apiResponse(404, { message: `No data found for route from ${origination} to ${destination} on ${date}` });
     }
   
-    if (requestedClass) {
-      if (!classRegex.test(requestedClass)) {
-        return apiResponse(400, { message: `Invalid class ${requestedClass}` });
-      }
-      
+    if (requestedClass && classRegex.test(requestedClass)) {
       const filteredHA = Array.from(highlyAvailable).filter(item => item.trainClass.includes(requestedClass));
       const filteredLA = Array.from(limitedAvailability).filter(item => item.trainClass.includes(requestedClass));
       const filteredNA = Array.from(notAvailable).filter(item => item.trainClass.includes(requestedClass));
