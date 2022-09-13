@@ -1,6 +1,6 @@
 {
-  "name": "train-schedule",
-  "description": "",
+  "name": "train-ticket-checker",
+  "description": "Information of train departure time, arrival time, ticket price, and seat availability. Data fetched from PT. KAI.",
   "version": "1.0.0",
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
